@@ -1,4 +1,3 @@
-# Manraj Singh Student ID: 010424850
 import csv
 import datetime
 import Package
@@ -8,7 +7,6 @@ import requests
 from dotenv import load_dotenv
 import os
 load_dotenv()
-
 
 
 # Function to load package data from the CSV file into a hash table
@@ -350,11 +348,13 @@ while exit:
         option = input("\nChoose An Option: 1, 2, 3, 4, 5, 6: ")
 
     elif option == "5":
-        # Base URLs and API Key for OpenWeatherMap and list of cities in the route
+        # Option 5: Gets Weather Data
+
+        # Base URLs and API Key for Weather and list of cities in the route
         BASE_URL_CURRENT = "https://api.openweathermap.org/data/2.5/weather?"
         BASE_URL_FORECAST = "https://api.openweathermap.org/data/2.5/forecast?"
         API_KEY = os.getenv("API_KEY")
-        CITIES = ["Salt Lake City,UT,US", "West Valley City,UT,US", "Holladay,UT,US", "Murray,UT,US"]
+        CITIES = ["Salt Lake City, UT, US", "West Valley City, UT, US", "Holladay, UT, US", "Murray, UT, US", "Millcreek, UT, US"]
 
         # Function converts temp from kelvin to celsius and fahrenheit
         def kelvin_to_celsius_fahrenheit(kelvin):
@@ -371,12 +371,27 @@ while exit:
             description = response['weather'][0]['description']
             print(f"Current Weather in {city}: {temp_fahrenheit:.2f}°F, {description}")
 
-        # Function displays hourly tomorrow weather for city in cities list
+
+        # Function displays today's hourly forecast weather for city in cities list
+        def get_tdhourly_weather(city):
+            url = BASE_URL_FORECAST + "appid=" + API_KEY + "&q=" + city.replace(" ", "%20")
+            response = requests.get(url).json()
+            today = datetime.date.today()
+            print(f"\nToday's hourly forecast:")
+            for item in response['list']:
+                forecast_time = datetime.datetime.fromtimestamp(item['dt'])
+                if forecast_time.date() == today:
+                    temp_kelvin = item['main']['temp']
+                    temp_celsius, temp_fahrenheit = kelvin_to_celsius_fahrenheit(temp_kelvin)
+                    description = item['weather'][0]['description']
+                    print(f"At {forecast_time.strftime('%H:%M')}: {temp_fahrenheit:.2f}°F, {description}")
+
+        # Function displays tomorrow's hourly forecast for city in cities list
         def get_tmrw_weather(city):
             url = BASE_URL_FORECAST + "appid=" + API_KEY + "&q=" + city.replace(" ", "%20")
             response = requests.get(url).json()
-            tmrw = datetime.date.today()  # changed to today not tmrw + datetime.timedelta(days=1)
-            print(f"Tomorrow's weather forecast for {city}:")
+            tmrw = datetime.date.today() + datetime.timedelta(days=1)
+            print(f"\nTomorrow's hourly forecast: ")
             for item in response['list']:
                 forecast_time = datetime.datetime.fromtimestamp(item['dt'])
                 if forecast_time.date() == tmrw:
@@ -389,7 +404,9 @@ while exit:
         for city in CITIES:
             print("------")
             get_current_weather(city)
+            get_tdhourly_weather(city)
             get_tmrw_weather(city)
+
             print("------")
 
         # Re-displaying menu and take user input again for selecting an option
@@ -402,7 +419,7 @@ while exit:
         option = input("\nChoose An Option: 1, 2, 3, 4, 5, 6: ")
 
     elif option == "6":
-        # Option 5: Exits Program
+        # Option 6: Exits Program
         print('Exiting Program...')
         exit = False  # Sets exit to False and will exit the loop
 
