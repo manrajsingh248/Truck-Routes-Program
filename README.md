@@ -1,3 +1,3 @@
 # Truck-Routes-Program
 
-Program output in web screenshots folder!
+Program output in user-interface screenshots folder!
